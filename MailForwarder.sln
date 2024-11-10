@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailForwarder.Service", "MailForwarder.Service\MailForwarder.Service.csproj", "{D350508E-2587-47CA-BE15-D63CFBA05BD3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailForwarder.Lib", "MailForwarder.Lib\MailForwarder.Lib.csproj", "{6A52B8EE-31C4-460D-B6D2-A53ADCF1C2EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{D350508E-2587-47CA-BE15-D63CFBA05BD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D350508E-2587-47CA-BE15-D63CFBA05BD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D350508E-2587-47CA-BE15-D63CFBA05BD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A52B8EE-31C4-460D-B6D2-A53ADCF1C2EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A52B8EE-31C4-460D-B6D2-A53ADCF1C2EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A52B8EE-31C4-460D-B6D2-A53ADCF1C2EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A52B8EE-31C4-460D-B6D2-A53ADCF1C2EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

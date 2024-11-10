@@ -2,10 +2,12 @@ namespace MailForwarder.Service;
 
 public class Worker : BackgroundService
 {
+    private IServiceProvider _serviceProvider;
     private readonly ILogger<Worker> _logger;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger)
     {
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -13,11 +15,15 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogDebug("Worker running at: {time}", DateTimeOffset.Now);
             }
-            await Task.Delay(1000, stoppingToken);
+
+            var mailForwarder = _serviceProvider.GetService<MailForwarder.Lib.MailForwarder>();
+            mailForwarder?.ProcessMails();
+
+            await Task.Delay(60000, stoppingToken);
         }
     }
 }

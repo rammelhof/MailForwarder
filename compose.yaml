@@ -1,0 +1,31 @@
+services:
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    container_name: mailserver
+    # Provide the FQDN of your mail server here (Your DNS MX record should point to this value)
+    hostname: mail.localhost
+    ports:
+      - "25:25"
+      - "143:143"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      #- ./docker-data/dms/mail-data/:/var/mail/
+      #- ./docker-data/dms/mail-state/:/var/mail-state/
+      #- ./docker-data/dms/mail-logs/:/var/log/mail/
+      - ./docker-data/dms/config/:/tmp/docker-mailserver/
+      #- ./docker-data/dms/etc:/etc
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ENABLE_RSPAMD=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_FAIL2BAN=0
+      - ENABLE_OPENDKIM=0
+      - ENABLE_OPENDMARC=0
+      - ENABLE_SASLAUTHD=0
+      - SPOOF_PROTECTION=0
+      - SSL_TYPE=self-signed
+    cap_add:
+      - NET_ADMIN # For Fail2Ban to work
+    restart: always
