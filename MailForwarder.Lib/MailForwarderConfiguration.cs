@@ -13,4 +13,8 @@ public class MailForwarderConfiguration
     public String? MailTo { get; set; }
     public String? FowardTo { get; set; }
     public String? SRSHashKey { get; set; }
+    public String? ImapNamespace { get; set; }
+    public String? ImapSentFolder { get; set; }
+    public String? ImapArchivFolder { get; set; }
+    public String? SRSTemplate { get; set; }
 }

@@ -24,11 +24,17 @@ public class SRS
     }
 
 
-    public string BuildSRSAddress(string origDomain, string origLocalPart, string newDomain)
+    public string BuildSRSAddress(string origSenderDomain, string origSenderLocalPart, string newSenderDomain, string newSenderLocalPart)
     {
         string timestamp = makeTimestamp();
-        string hash = makeHash($"{origDomain};{origLocalPart};{newDomain}");
-        string fromSRSAddress = $"SRS0={hash}={timestamp}={origDomain}={origLocalPart}@{newDomain}";
+        string hash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
+        string fromSRSAddress = (_configuration.SRSTemplate ?? "SRS0={hash}={timestamp}={origSenderDomain}={origSenderLocalPart}@{newSenderDomain}")
+            .Replace("{hash}",hash)
+            .Replace("{timestamp}", timestamp)
+            .Replace("{origSenderDomain}", origSenderDomain)
+            .Replace("{origSenderLocalPart}", origSenderLocalPart)
+            .Replace("{newSenderDomain}", newSenderDomain)
+            .Replace("{newSenderLocalPart}", newSenderLocalPart);
         return fromSRSAddress;
     }
 

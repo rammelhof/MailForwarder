@@ -12,6 +12,7 @@
 appsettings.Production.json
 appsettings.Development.json
 docker-data/
+publish/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

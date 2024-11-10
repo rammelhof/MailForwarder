@@ -13,17 +13,30 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogInformation("Worker start at: {time}", DateTimeOffset.Now);
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogDebug("Worker running at: {time}", DateTimeOffset.Now);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("Worker running at: {time}", DateTimeOffset.Now);
+                }
+
+                var mailForwarder = _serviceProvider.GetService<MailForwarder.Lib.MailForwarder>();
+                mailForwarder?.ProcessMails();
+
+                await Task.Delay(30000, stoppingToken);
             }
-
-            var mailForwarder = _serviceProvider.GetService<MailForwarder.Lib.MailForwarder>();
-            mailForwarder?.ProcessMails();
-
-            await Task.Delay(60000, stoppingToken);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Message}", ex.Message);
+            Environment.Exit(1);
         }
     }
 }
