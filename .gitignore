@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 appsettings.Production.json
+appsettings.Development.json
 docker-data/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
