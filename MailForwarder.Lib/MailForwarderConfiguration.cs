@@ -17,4 +17,6 @@ public class MailForwarderConfiguration
     public String? ImapSentFolder { get; set; }
     public String? ImapArchivFolder { get; set; }
     public String? SRSTemplate { get; set; }
+    public String? PushUrlOk { get; set; }
+    public String? PushUrlError { get; set; }
 }
