@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -21,6 +22,38 @@ public class SRS
     {
         _logger = logger;
         _configuration = configuration.Value;
+    }
+
+    public string GetSRSAddressOriginalLocalPart(string srsAddress){
+        return GetSRSPart(srsAddress,"{origSenderLocalPart}");
+    }
+
+    public string GetSRSAddressOriginalDomain(string srsAddress){
+        return GetSRSPart(srsAddress,"{origSenderDomain}");
+    }
+
+    public string GetSRSAddressHash(string srsAddress){
+        return GetSRSPart(srsAddress,"{hash}");
+    }
+
+    private string GetSRSPart(string input, string relevantPart){
+        string template = _configuration.SRSTemplate ?? "";
+        string regexStr = Regex.Replace(template.Replace(relevantPart, "(.*)"), "{.*?}", ".*");
+        var match = Regex.Match(input, regexStr);
+        if(match.Success && match.Groups.Count == 2){
+            return match.Groups[1].Value;
+        }
+        else
+            return String.Empty;
+    }
+
+    public bool CheckSRSAddress(string srsAddress){
+        string origSenderDomain = GetSRSAddressOriginalDomain(srsAddress);
+        string origSenderLocalPart = GetSRSAddressOriginalLocalPart(srsAddress);
+        string hash = GetSRSAddressHash(srsAddress);
+        string calcHash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
+        
+        return calcHash.Equals(hash);
     }
 
 

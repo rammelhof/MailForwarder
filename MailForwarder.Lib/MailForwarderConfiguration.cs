@@ -11,12 +11,15 @@ public class MailForwarderConfiguration
     public String? SmtpPassword { get; set; }
     public int? SmtpPort { get; set; }
     public String? MailTo { get; set; }
+    public String? MailToName { get; set; }
     public String? FowardTo { get; set; }
+    public String? FowardToName { get; set; }
     public String? SRSHashKey { get; set; }
     public String? ImapNamespace { get; set; }
     public String? ImapSentFolder { get; set; }
     public String? ImapArchivFolder { get; set; }
     public String? SRSTemplate { get; set; }
+    public String? SRSSearchTerm { get; set; }
     public String? PushUrlOk { get; set; }
     public String? PushUrlError { get; set; }
 }

@@ -51,9 +51,12 @@ public class Worker : BackgroundService
 
                 await Task.Delay(60000, stoppingToken);
             }
+
+            _logger.LogInformation("Worker stopped at: {time}", DateTimeOffset.Now);
         }
         catch (OperationCanceledException)
         {
+            _logger.LogInformation("Worker cancled at: {time}", DateTimeOffset.Now);
         }
         catch (Exception ex)
         {

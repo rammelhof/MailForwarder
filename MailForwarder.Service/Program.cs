@@ -32,3 +32,6 @@ builder.Services.AddSerilog();
 
 var host = builder.Build();
 host.Run();
+
+Log.Logger.Information("Stopped");
+Log.CloseAndFlush();
