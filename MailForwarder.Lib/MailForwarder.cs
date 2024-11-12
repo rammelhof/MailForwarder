@@ -122,6 +122,9 @@ public class MailForwarder
                     message.ReplyTo.Clear();
                     message.ReplyTo.Add(newFromAddress);
 
+                    message.Cc.Clear();
+                    message.Bcc.Clear();
+
                     SendMessage(imapClient, inbox, messageId, message);
                 }
             }
@@ -155,6 +158,9 @@ public class MailForwarder
 
                     message.ReplyTo.Clear();
                     message.ReplyTo.Add(origMessageFrom);
+
+                    message.Cc.Clear();
+                    message.Bcc.Clear();
 
                     SendMessage(imapClient, inbox, messageId, message);
                 }
