@@ -124,6 +124,7 @@ public class MailForwarder
 
                     message.Cc.Clear();
                     message.Bcc.Clear();
+                    message.Sender = null;
 
                     SendMessage(imapClient, inbox, messageId, message);
                 }
@@ -155,12 +156,13 @@ public class MailForwarder
 
                     message.From.Clear();
                     message.From.Add(fromAddress);
-
+                    
                     message.ReplyTo.Clear();
                     message.ReplyTo.Add(origMessageFrom);
 
                     message.Cc.Clear();
                     message.Bcc.Clear();
+                    message.Sender = null;
 
                     SendMessage(imapClient, inbox, messageId, message);
                 }
