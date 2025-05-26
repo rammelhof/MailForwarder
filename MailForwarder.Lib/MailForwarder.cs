@@ -67,19 +67,23 @@ public class MailForwarder
             {
                 var message = inbox.GetMessage(messageId);
 
-                // check for To address match
-                var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address));
-                if (origMessageTo != null)
+                var origMessageFrom = message.From.Cast<MailboxAddress>().FirstOrDefault();
+                if (origMessageFrom != null && !_configuration.BlacklistMailFrom.Contains(origMessageFrom.Address))
                 {
-                    ForwardMessage(imapClient, inbox, messageId, message);
-                }
+                    // check for To address match
+                    var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address, StringComparison.InvariantCultureIgnoreCase));
+                    if (origMessageTo != null)
+                    {
+                        ForwardMessage(imapClient, inbox, messageId, message);
+                    }
 
 
-                // check for SRS pattern match
-                var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS="));
-                if (srsMessageTo != null)
-                {
-                    SendBackMessage(imapClient, inbox, messageId, message);
+                    // check for SRS pattern match
+                    var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
+                    if (srsMessageTo != null)
+                    {
+                        SendBackMessage(imapClient, inbox, messageId, message);
+                    }
                 }
 
             }
@@ -97,7 +101,7 @@ public class MailForwarder
     {
         _logger.LogInformation($"SendBackMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
 
-        var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS="));
+        var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
         if (srsMessageTo != null)
         {
             var srs = _serviceProvider.GetService(typeof(SRS)) as SRS;
@@ -114,7 +118,7 @@ public class MailForwarder
                     message.To.Clear();
                     message.To.Add(newToAddress);
 
-                    
+
                     var newFromAddress = new MailboxAddress(_configuration.MailToName ?? String.Empty, _configuration.MailTo);
                     message.From.Clear();
                     message.From.Add(newFromAddress);
@@ -156,7 +160,7 @@ public class MailForwarder
 
                     message.From.Clear();
                     message.From.Add(fromAddress);
-                    
+
                     message.ReplyTo.Clear();
                     message.ReplyTo.Add(origMessageFrom);
 

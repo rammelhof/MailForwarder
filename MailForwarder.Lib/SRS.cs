@@ -39,7 +39,7 @@ public class SRS
     private string GetSRSPart(string input, string relevantPart){
         string template = _configuration.SRSTemplate ?? "";
         string regexStr = Regex.Replace(template.Replace(relevantPart, "(.*)"), "{.*?}", ".*");
-        var match = Regex.Match(input, regexStr);
+        var match = Regex.Match(input, regexStr, RegexOptions.IgnoreCase);
         if(match.Success && match.Groups.Count == 2){
             return match.Groups[1].Value;
         }
@@ -53,7 +53,7 @@ public class SRS
         string hash = GetSRSAddressHash(srsAddress);
         string calcHash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
         
-        return calcHash.Equals(hash);
+        return calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase);
     }
 
 

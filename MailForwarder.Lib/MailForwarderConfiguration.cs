@@ -2,6 +2,11 @@ namespace MailForwarder.Lib;
 
 public class MailForwarderConfiguration
 {
+    public MailForwarderConfiguration()
+    {
+        BlacklistMailFrom = new string[] { };
+    }
+
     public String? ImapServer { get; set; }
     public String? ImapUser { get; set; }
     public String? ImapPassword { get; set; }
@@ -22,4 +27,5 @@ public class MailForwarderConfiguration
     public String? SRSSearchTerm { get; set; }
     public String? PushUrlOk { get; set; }
     public String? PushUrlError { get; set; }
+    public String[] BlacklistMailFrom { get; set; }
 }
