@@ -132,6 +132,10 @@ public class MailForwarder
 
                     SendMessage(imapClient, inbox, messageId, message);
                 }
+                else
+                {
+                    throw new Exception("Check SRS Address failed!");
+                }
             }
         }
     }

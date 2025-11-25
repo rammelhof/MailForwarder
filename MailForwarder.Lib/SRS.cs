@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace MailForwarder.Lib;
 
@@ -53,7 +54,21 @@ public class SRS
         string hash = GetSRSAddressHash(srsAddress);
         string calcHash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
         
-        return calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase);
+        if(calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase))
+        {
+            return true;
+        }
+
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        string origSenderLocalPartTitleCase = textInfo.ToTitleCase(origSenderLocalPart);
+
+        calcHash = makeHash($"{origSenderDomain};{origSenderLocalPartTitleCase}");
+        if (calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase))
+        {
+            return true;
+        }
+
+        return true;
     }
 
 
