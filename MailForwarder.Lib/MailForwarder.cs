@@ -84,7 +84,8 @@ public class MailForwarder
                     var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address, StringComparison.InvariantCultureIgnoreCase));
                     if (origMessageTo != null)
                     {
-                        ForwardMessage(imapClient, inbox, messageId, message);
+                        if (ForwardMessage(imapClient, inbox, messageId, message))
+                            processedMailsCnt++;
                     }
 
 
@@ -92,10 +93,11 @@ public class MailForwarder
                     var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
                     if (srsMessageTo != null)
                     {
-                        SendBackMessage(imapClient, inbox, messageId, message);
+                        if (SendBackMessage(imapClient, inbox, messageId, message))
+                            processedMailsCnt++;
                     }
 
-                    processedMailsCnt++;
+
                 }
             }
 
@@ -115,7 +117,7 @@ public class MailForwarder
 
         return result;
     }
-    private void SendBackMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
+    private bool SendBackMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
     {
         _logger.LogInformation($"SendBackMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
 
@@ -149,6 +151,7 @@ public class MailForwarder
                     message.Sender = null;
 
                     SendMessage(imapClient, inbox, messageId, message);
+                    return true;
                 }
                 else
                 {
@@ -156,9 +159,10 @@ public class MailForwarder
                 }
             }
         }
+        return false;
     }
 
-    private void ForwardMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
+    private bool ForwardMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
     {
         _logger.LogInformation($"ForwardMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
 
@@ -191,9 +195,11 @@ public class MailForwarder
                     message.Sender = null;
 
                     SendMessage(imapClient, inbox, messageId, message);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     private void SendMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
