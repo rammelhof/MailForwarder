@@ -33,7 +33,12 @@ public class Worker : BackgroundService
                 try
                 {
                     var mailForwarder = _serviceProvider.GetService<MailForwarder.Lib.MailForwarder>();
-                    mailForwarder?.ProcessMails();
+                    var result = mailForwarder?.ProcessMails();
+
+                    if (!(result?.IsSuccess ?? false))
+                    {
+                        throw new Exception("ProcessMails failed!?");
+                    }
 
                     if (_configuration.PushUrlOk != null)
                         await new HttpClient().GetAsync(_configuration.PushUrlOk.Replace("{msg}", "ProcessMails success"));

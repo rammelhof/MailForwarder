@@ -23,12 +23,14 @@ public class MailForwarder
         _configuration = configuration.Value;
     }
 
-    public void ProcessMails()
+    public MailProcessResult ProcessMails()
     {
+        var result = new MailProcessResult();
+
         if (String.IsNullOrEmpty(_configuration.MailTo))
         {
             _logger.LogWarning($"Configuration missing: MailTo");
-            return;
+            return result;
         }
 
         if (_logger.IsEnabled(LogLevel.Debug))
@@ -63,12 +65,20 @@ public class MailForwarder
 
             var uids = inbox.Search(query);
 
+            int processMailsCnt = 0;
+            int processedMailsCnt = 0;
             foreach (var messageId in uids)
             {
+                processMailsCnt++;
+
                 var message = inbox.GetMessage(messageId);
 
                 var origMessageFrom = message.From.Cast<MailboxAddress>().FirstOrDefault();
-                if (origMessageFrom != null && !_configuration.BlacklistMailFrom.Contains(origMessageFrom.Address))
+                if (origMessageFrom != null && _configuration.BlacklistMailFrom.Contains(origMessageFrom.Address.ToLower()))
+                {
+                    _logger.LogWarning($"Mail address is on blacklist");
+                }
+                else if (origMessageFrom != null)
                 {
                     // check for To address match
                     var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address, StringComparison.InvariantCultureIgnoreCase));
@@ -84,9 +94,15 @@ public class MailForwarder
                     {
                         SendBackMessage(imapClient, inbox, messageId, message);
                     }
-                }
 
+                    processedMailsCnt++;
+                }
             }
+
+            result.MailsProcessed = processedMailsCnt;
+
+            // check all mails processed?
+            result.IsSuccess = processMailsCnt == processedMailsCnt;
 
             imapClient.Disconnect(true);
         }
@@ -96,11 +112,13 @@ public class MailForwarder
         {
             _logger.LogDebug("MailForwarder.ProcessMails finished at: {time}", DateTimeOffset.Now);
         }
+
+        return result;
     }
     private void SendBackMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
     {
         _logger.LogInformation($"SendBackMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
-        
+
         var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
         if (srsMessageTo != null)
         {
