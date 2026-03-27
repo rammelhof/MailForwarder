@@ -15,7 +15,7 @@ namespace MailForwarder.Lib;
 public class SRS
 {
     private static double timePrecision = (60 * 60 * 24);
-    private const string Base32Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    private readonly string Base32Alphabet;
     private readonly ILogger<MailForwarder> _logger;
     private readonly MailForwarderConfiguration _configuration;
 
@@ -23,38 +23,58 @@ public class SRS
     {
         _logger = logger;
         _configuration = configuration.Value;
+
+        // default Alphabet
+        Base32Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        if (configuration?.Value?.Base32Alphabet != null)
+        {
+            Base32Alphabet = configuration.Value.Base32Alphabet;
+        }
     }
 
-    public string GetSRSAddressOriginalLocalPart(string srsAddress){
-        return GetSRSPart(srsAddress,"{origSenderLocalPart}");
+    public string GetSRSAddressOriginalLocalPart(string srsAddress)
+    {
+        return GetSRSPart(srsAddress, "{origSenderLocalPart}");
     }
 
-    public string GetSRSAddressOriginalDomain(string srsAddress){
-        return GetSRSPart(srsAddress,"{origSenderDomain}");
+    public string GetSRSAddressOriginalDomain(string srsAddress)
+    {
+        return GetSRSPart(srsAddress, "{origSenderDomain}");
     }
 
-    public string GetSRSAddressHash(string srsAddress){
-        return GetSRSPart(srsAddress,"{hash}");
+    public string GetSRSAddressHash(string srsAddress)
+    {
+        return GetSRSPart(srsAddress, "{hash}");
     }
 
-    private string GetSRSPart(string input, string relevantPart){
+    private string GetSRSPart(string input, string relevantPart)
+    {
         string template = _configuration.SRSTemplate ?? "";
         string regexStr = Regex.Replace(template.Replace(relevantPart, "(.*)"), "{.*?}", ".*");
         var match = Regex.Match(input, regexStr, RegexOptions.IgnoreCase);
-        if(match.Success && match.Groups.Count == 2){
+        if (match.Success && match.Groups.Count == 2)
+        {
             return match.Groups[1].Value;
         }
         else
             return String.Empty;
     }
 
-    public bool CheckSRSAddress(string srsAddress){
+    public bool CheckSRSAddress(string srsAddress)
+    {
         string origSenderDomain = GetSRSAddressOriginalDomain(srsAddress);
         string origSenderLocalPart = GetSRSAddressOriginalLocalPart(srsAddress);
         string hash = GetSRSAddressHash(srsAddress);
+
+        string calcHashLower = makeHash($"{origSenderDomain};{origSenderLocalPart}".ToLower());
+        if (calcHashLower.Equals(hash, StringComparison.InvariantCultureIgnoreCase))
+        {
+            return true;
+        }
+
         string calcHash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
-        
-        if(calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase))
+
+        if (calcHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase))
         {
             return true;
         }
@@ -68,16 +88,16 @@ public class SRS
             return true;
         }
 
-        return true;
+        return false;
     }
 
 
     public string BuildSRSAddress(string origSenderDomain, string origSenderLocalPart, string newSenderDomain, string newSenderLocalPart)
     {
         string timestamp = makeTimestamp();
-        string hash = makeHash($"{origSenderDomain};{origSenderLocalPart}");
+        string hash = makeHash($"{origSenderDomain};{origSenderLocalPart}".ToLower());
         string fromSRSAddress = (_configuration.SRSTemplate ?? "SRS0={hash}={timestamp}={origSenderDomain}={origSenderLocalPart}@{newSenderDomain}")
-            .Replace("{hash}",hash)
+            .Replace("{hash}", hash)
             .Replace("{timestamp}", timestamp)
             .Replace("{origSenderDomain}", origSenderDomain)
             .Replace("{origSenderLocalPart}", origSenderLocalPart)
@@ -95,7 +115,7 @@ public class SRS
         return base32String.Substring(0, 3);
     }
 
-    public string makeTimestamp()
+    private string makeTimestamp()
     {
         var nowUnixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -106,7 +126,7 @@ public class SRS
         return base32String;
     }
 
-    public static byte[] GetBytes(int value, int size)
+    private byte[] GetBytes(int value, int size)
     {
         byte[] buffer = new byte[size];
         for (int i = 0; i < size; i++)
@@ -118,7 +138,7 @@ public class SRS
     }
 
 
-    public static string Encode(byte[] data, int bitsAmount = int.MaxValue)
+    private string Encode(byte[] data, int bitsAmount = int.MaxValue)
     {
         StringBuilder result = new StringBuilder();
         int buffer = 0, bitsInBuffer = 0, totalBits = 0;
@@ -151,13 +171,13 @@ public class SRS
         return result.ToString();
     }
 
-    public static byte[] Decode(string base32)
+    private byte[] Decode(string base32)
     {
         int bitsInBuffer = 0, buffer = 0;
         int byteCnt = (int)Math.Ceiling(base32.Length * 5.0 / 8);
         byte[] result = new byte[byteCnt]; // Max size
         int index = 0;
-        for(int i=base32.Length-1;i>=0;i--)
+        for (int i = base32.Length - 1; i >= 0; i--)
         {
             char c = base32[i];
             if (c == '=' || !Base32Alphabet.Contains(c)) continue; // Skip padding and invalid characters
@@ -175,7 +195,7 @@ public class SRS
         {
             result[index++] = (byte)(buffer); // Get 8 bits
         }
-        
+
         return result;
     }
 }

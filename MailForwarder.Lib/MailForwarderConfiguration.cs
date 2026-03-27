@@ -28,4 +28,6 @@ public class MailForwarderConfiguration
     public String? PushUrlOk { get; set; }
     public String? PushUrlError { get; set; }
     public String[] BlacklistMailFrom { get; set; }
+
+    public String? Base32Alphabet { get; set; }
 }

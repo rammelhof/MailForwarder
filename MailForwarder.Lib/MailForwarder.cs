@@ -100,7 +100,7 @@ public class MailForwarder
     private void SendBackMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
     {
         _logger.LogInformation($"SendBackMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
-
+        
         var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
         if (srsMessageTo != null)
         {
@@ -144,7 +144,7 @@ public class MailForwarder
     {
         _logger.LogInformation($"ForwardMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
 
-        var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address));
+        var origMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => (_configuration.MailTo ?? String.Empty).Equals(a.Address, StringComparison.InvariantCultureIgnoreCase));
         if (origMessageTo != null)
         {
             var toAddress = new MailboxAddress(_configuration.FowardToName ?? String.Empty, _configuration.FowardTo ?? String.Empty);
