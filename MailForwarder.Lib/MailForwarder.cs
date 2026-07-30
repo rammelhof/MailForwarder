@@ -33,6 +33,42 @@ public class MailForwarder
             return result;
         }
 
+        if (String.IsNullOrEmpty(_configuration.ImapServer))
+        {
+            _logger.LogWarning($"Configuration missing: ImapServer");
+            return result;
+        }
+
+        if (String.IsNullOrEmpty(_configuration.ImapUser))
+        {
+            _logger.LogWarning($"Configuration missing: ImapUser");
+            return result;
+        }
+
+        if (String.IsNullOrEmpty(_configuration.ImapPassword))
+        {
+            _logger.LogWarning($"Configuration missing: ImapPassword");
+            return result;
+        }
+
+        if (String.IsNullOrEmpty(_configuration.SmtpServer))
+        {
+            _logger.LogWarning($"Configuration missing: SmtpServer");
+            return result;
+        }
+
+        if (String.IsNullOrEmpty(_configuration.SmtpUser))
+        {
+            _logger.LogWarning($"Configuration missing: SmtpPassword");
+            return result;
+        }
+
+        if (String.IsNullOrEmpty(_configuration.SmtpPassword))
+        {
+            _logger.LogWarning($"Configuration missing: SmtpPassword");
+            return result;
+        }
+
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             _logger.LogDebug("MailForwarder.ProcessMails running at: {time}", DateTimeOffset.Now);
@@ -121,6 +157,11 @@ public class MailForwarder
     {
         _logger.LogInformation($"SendBackMessage: Sender: {message.From} Recipient: {message.To} Subject: {message.Subject}");
 
+        if (String.IsNullOrEmpty(_configuration.MailTo))
+        {
+            throw new Exception($"Configuration missing: MailTo");
+        }
+
         var srsMessageTo = message.To.Cast<MailboxAddress>().FirstOrDefault(a => a.Address.Contains(_configuration.SRSSearchTerm ?? "+SRS=", StringComparison.InvariantCultureIgnoreCase));
         if (srsMessageTo != null)
         {
@@ -204,6 +245,11 @@ public class MailForwarder
 
     private void SendMessage(ImapClient imapClient, IMailFolder inbox, UniqueId messageId, MimeMessage message)
     {
+        if (String.IsNullOrEmpty(_configuration.SmtpServer))
+        {
+            throw new Exception($"Configuration missing: SmtpServer");
+        }
+
         // mail send to
         using (var smtpClient = new SmtpClient())
         {
@@ -225,6 +271,11 @@ public class MailForwarder
 
             if (!String.IsNullOrEmpty(_configuration.SmtpUser))
             {
+                if (String.IsNullOrEmpty(_configuration.SmtpPassword))
+                {
+                    throw new Exception($"Configuration missing: SmtpServer");
+                }
+
                 smtpClient.Authenticate(_configuration.SmtpUser, _configuration.SmtpPassword);
             }
 
