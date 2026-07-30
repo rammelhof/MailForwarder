@@ -5,6 +5,7 @@ public class MailForwarderConfiguration
     public MailForwarderConfiguration()
     {
         BlacklistMailFrom = new string[] { };
+        CheckInterval = 60000;
     }
 
     public String? ImapServer { get; set; }
@@ -30,4 +31,6 @@ public class MailForwarderConfiguration
     public String[] BlacklistMailFrom { get; set; }
 
     public String? Base32Alphabet { get; set; }
+
+    public int CheckInterval { get; set; }
 }

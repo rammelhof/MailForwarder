@@ -21,6 +21,8 @@ public class Worker : BackgroundService
         try
         {
             _logger.LogInformation("Worker start at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker interval: {interval}s", _configuration.CheckInterval / 1000);
+            
 
             int failCounter = 0;
             while (!stoppingToken.IsCancellationRequested)
@@ -54,7 +56,7 @@ public class Worker : BackgroundService
 
                 }
 
-                await Task.Delay(60000, stoppingToken);
+                await Task.Delay(_configuration.CheckInterval, stoppingToken);
             }
 
             _logger.LogInformation("Worker stopped at: {time}", DateTimeOffset.Now);
